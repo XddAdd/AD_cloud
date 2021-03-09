@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的文件</title>
+    <script src="../js/jquery-3.3.1.js"></script>
+    <script src="../js/getParameter.js"></script>
+    <script type="text/javascript">
+        var websocket = null;
+
+
+        $(function () {
+            //    页面加载完成后执行
+
+            load(getParameter("storeId"), getParameter("folderId"));
+
+            //新建文件夹请求
+            $("#newFolderBut").click(function () {
+                var folderName = $("#newFolderName").val();
+                var storeId = $("#currentStoreId").html();
+                var folderId = $("#currentFolderId").html();
+                if (folderName != "") {
+                    //发送请求
+                    $.get({
+                        url: "../newFileFolder",//请求路径
+                        type: "get",
+                        data: {"storeId": storeId, "folderId": folderId, "folderName": folderName},
+                        success: function (json) {
+                            //添加完成后重新加载页面
+                            data = json.data;
+                            load(storeId, folderId);
+                        }
+                    });
+                }
+            });
+
+            //上传文件
+            $("#uploadFileBut").click(function () {
+                var storeId = $("#currentStoreId").html();
+                var folderId = $("#currentFolderId").html();
+                var targetUrl = $(this).attr("data-url");
+                var data = new FormData();
+                //FormData对象加入参数
+                data.append('file', $('#file')[0].files[0]); //'file' 为参数名，$('#file')[0].files[0])获取上传的文件，如果需上传多个文件，要在<input>标签加上属性multiple
+                data.append('storeId', storeId);
+                data.append('folderId', folderId);
+                $.ajax({
+                    type: 'post',
+                    url: targetUrl,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    data: data,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (!data.success || !data.data)
+                            alert("上传失败\ncode=" + data.code + "\n" + data.message);
+                        else alert("上传成功");
+                    },
+                    error: function () {
+                        alert("请求失败")
+                    }
+                })
+
+            });
+
+
+        });
+
+        //请求加载文件列表
+        function load(storeId, folderId) {
+            $.get({
+                url: "../fileList",//请求路径
+                type: "get",
+                data: {"storeId": storeId, "folderId": folderId},
+                success: function (json) {
+                    data = json.data;
+                    var show = "";
+                    //文件夹列表
+                    var folderList = "";
+                    for (var i = 0; i < data.fileFolderList.length; i++) {
+                        var str = "";
+                        str += "<tr>"
+                        str += "<td><img src=\"../img/文件夹.png\"></td>\n" +
+                            "                    <td ><div onclick=\"javascript:load(" + data.fileFolderList[i].fileStorehouseId + "," + data.fileFolderList[i].id + ")\"><a href=\"javascript:void(0)\">" + data.fileFolderList[i].fileFolderName + "</a></div></td>\n" +
+                            "                    <td></td>\n" +
+                            "                    <td>" + data.fileFolderList[i].createTime + "</td>"
+                        str += "</tr>"
+                        folderList += str;
+                    }
+                    //文件列表
+                    var fileList = "";
+                    for (var i = 0; i < data.fileList.length; i++) {
+                        var str = "";
+                        str += "<tr>"
+                        str += "<td><img src=\"../img/文件.jpg\"></td>\n" +
+                            "                    <td><a href=\"../downloadFile?fileId=" + data.fileList[i].id + "&filePath=" + data.fileList[i].filePath + "\">" + data.fileList[i].fileName + "</a></td>\n" +
+                            "                    <td>" + data.fileList[i].fileSize + "</td>\n" +
+                            "                    <td>" + data.fileList[i].uploadTime + "</td>"
+                        str += "</tr>"
+                        fileList += str;
+                    }
+                    show += folderList + fileList;
+                    //展示文件
+                    $("#showFile").html(show);
+                    //展示当前仓库id和当前文件夹id
+                    $("#currentStoreId").html(storeId);
+                    $("#currentFolderId").html(folderId);
+                    $("#currentStoreId").css('display', 'none');//隐藏
+                    $("#currentFolderId").css('display', 'none');//隐藏
+                }
+            });
+        }
+
+        //回退上一级目录
+        function goBack() {
+            //获取当前文件仓库id和文件夹id
+            var currentStoreId = $("#currentStoreId").html();
+            var currentFolderId = $("#currentFolderId").html();
+            if (currentFolderId == -1) return;
+            //查询当前路径的父文件id，并且加载父路径
+            $.get({
+                url: "../getParentFolderId",//请求路径
+                type: "get",
+                data: {"storeId": currentStoreId, "folderId": currentFolderId},
+                success: function (json) {
+                    //获取返回的当前路径的父路径id
+                    var parentFolderId = json.data;
+                    load(currentStoreId, parentFolderId);
+                }
+            });
+        }
+
+        //请求从http链接下载文件
+        function downloadFileFromHttp() {
+            //获取当前文件仓库id和文件夹id
+            var currentStoreId = $("#currentStoreId").html();
+            var currentFolderId = $("#currentFolderId").html();
+            var downloadURL = $("#downloadURL").val();
+            //查询当前路径的父文件id，并且加载父路径
+            $.post({
+                url: "../downloadFileFromHttpServlet",//请求路径
+                type: "post",
+                data: {"storeId": currentStoreId, "folderId": currentFolderId, "downloadURL": downloadURL},
+                success: function (json) {
+                    fileInfo = json.data;
+                    if (fileInfo == null) alert("当前路径已经存在该文件");
+                    else if (fileInfo.downloadStatus == 0 && websocket == null) {//任务插入成功，并且没有websocket连接
+                        //建立websocket
+                        websocket = new WebSocket("ws://" + document.location.host
+                            + "/file_downloader/updateDownloadTaskWebsocket",);
+
+                        //连接发生错误的回调方法
+                        websocket.onerror = function() {
+                            alert("WebSocket连接发生错误");
+                        }
+
+                        //连接成功建立的回调方法
+                        websocket.onopen = function () {
+                            //发送任务信息
+                            alert("下载任务添加成功，正在下载");
+                            send(fileInfo);
+                        }
+
+                        //接收到消息,展示下载进度到页面
+                        websocket.onmessage = function (fileInfos) {
+                            var fileInfos = event.data;
+                            showDownloadTask(fileInfos);
+                        }
+
+                        //连接关闭的回调方法
+                        websocket.onclose = function () {
+                            alert("全部下载完成");
+                        }
+
+                        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+                        window.onbeforeunload = function () {
+                            closeWebSocket();
+                        }
+
+                        //将下载信息展示在网页上
+                        function setMessageInnerHTML(innerHTML) {
+                            document.getElementById('message').innerHTML += innerHTML + '<br/>';
+                        }
+
+
+                        //发送消息
+                        function send(fileInfo) {
+                            websocket.send(JSON.stringify(fileInfo));
+                        }
+
+
+                    }else if (fileInfo.downloadStatus == 1) {
+                        alert("正在下载，请勿重复提交");
+                    }
+                }
+            });
+
+        };
+
+
+
+
+        //将下载信息展示在网页上
+        function showDownloadTask(fileInfos) {
+            fileInfos = JSON.parse(fileInfos); //由JSON字符串转换为JSON对象
+            if (fileInfos.length == 0) closeWebSocket();//无数据，关闭链接
+            var show = "";
+            for (var i = 0 ; i < fileInfos.length; i ++){
+                var str = "";
+                str += "<tr>"
+                str += "    <tr>\n" +
+                    "        <td>"+fileInfos[i].targetPath.substring(fileInfos[i].targetPath.lastIndexOf("/") + 1)+"</td>\n" +
+                    "        <td>"+fileInfos[i].targetPath+"</td>\n" +
+                    "        <td>"+fileInfos[i].fileSize+"</td>\n" +
+                    "        <td>"+fileInfos[i].downloadSize+"</td>\n" +
+                    "        <td>2m/s</td>\n" +
+                    "    </tr>";
+                str += "</tr>"
+                show += str;
+            }
+            $("#downloadTasks").html(show);
+        }
+
+        //关闭WebSocket连接
+        function closeWebSocket() {
+            websocket.close();
+        }
+
+
+
+
+    </script>
+</head>
+<body>
+
+
+
+<!--当前仓库id和文件夹id-->
+<div id="currentStoreId">-1</div>
+<div id="currentFolderId">-1</div>
+<!--当前所在路径-->
+<div>当前所在路径为:</div>
+<br>
+<div id="currentPath">/</div>
+<br>
+<!--回退上一级-->
+<div id="goBackBut"><a onclick="javascript:goBack()">回退上一级</a></div>
+
+<!--文件展示列表-->
+<table>
+    <thead>
+    <th>文件/文件夹</th>
+    <th>文件或者文件夹名</th>
+    <th>大小</th>
+    <th>创建时间</th>
+    </thead>
+</table>
+<table id="showFile">
+</table>
+
+
+<div>
+    <br>
+    新建文件夹
+    <br>
+    <input type="text" id="newFolderName">
+    <input type="button" id="newFolderBut" value="新建文件夹">
+    <br>
+</div>
+
+
+<div>
+    <br>
+    上传文件
+    <div id="uploadFile">
+        <input id="file" name="file" type="file"/><br>
+        <button id="uploadFileBut" data-url="../fileUpload" type="button">上传文件</button>
+    </div>
+    <br>
+</div>
+
+<div>
+    <br>
+    请直接输入http下载链接,可以直接上传至云盘<br>
+    <input type="text" name="downloadURL" id="downloadURL" placeholder="请在此输入http的下载链接">
+    <input type="button" name="downloadFromHttpBut" id="downloadFromHttpBut" value="提交"
+           onclick="javascript:downloadFileFromHttp()">
+    <br>
+</div>
+
+
+
+
+<!--文件展示列表-->
+<br>
+<table>
+    <thead>
+    <th>文件名</th>
+    <th>目标下载路径</th>
+    <th>文件总大小</th>
+    <th>已经下载</th>
+    <th>下载速度</th>
+    </thead>
+</table>
+<table id="downloadTasks">
+    <tr>
+        <td>虎牙直播</td>
+        <td>d:</td>
+        <td>1234</td>
+        <td>10</td>
+        <td>1m/s</td>
+    </tr>
+</table>
+
+
+</body>
+</html>

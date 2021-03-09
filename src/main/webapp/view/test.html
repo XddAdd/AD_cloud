@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/jquery-3.3.1.js"></script>
+
+    <script>
+        $(function () {
+            $("#but").click(function () {
+                $.ajax({
+                    type: 'get',
+                    url: "../test",
+                    data: {ac:"ac"},
+                    dataType: 'json',
+                    success: function (data) {
+                        alert('success');
+                    },
+                    error: function () {
+                        alert("请求失败")
+                    }
+                });
+
+            });
+            // $("#test").html("777");
+
+        });
+    </script>
+</head>
+<body>
+
+
+
+<intput type="button" id="but" name="but">提交</intput>
+
+
+</body>
+</html>

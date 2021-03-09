@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+    <script src="../js/jquery-3.3.1.js"></script>
+    <script src="../js/getParameter.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //上传文件
+            $("#uploadFileBut").click(function () {
+                var targetUrl = $(this).attr("data-url");
+                var data = new FormData();
+                //FormData对象加入参数
+                data.append('file', $('#file')[0].files[0]); //'file' 为参数名，$('#file')[0].files[0])获取上传的文件，如果需上传多个文件，要在<input>标签加上属性multiple
+                data.append('uid','1');
+                $.ajax({
+                    type: 'post',
+                    url: targetUrl,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    data: data,
+                    dataType: 'json',
+                    success: function (data) {
+                        alert('success');
+                    },
+                    error: function () {
+                        alert("请求失败")
+                    }
+                })
+
+            });
+
+
+        });
+    </script>
+
+</head>
+<body>
+
+
+    <form action="../fileUpload" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="username"><br>
+        <input type="hidden" name="password"><br>
+        <div name="u">112334</div>
+        文件<input type="file" name="file"><br>
+        <input type="submit" value="上传">
+    </form>
+
+    <br>
+    <br>
+
+    <div id="uploadFile">
+        <input id="file" name="file" type="file"/>
+        <button id="uploadFileBut" data-url="../fileUpload" type="button">上传文件</button>
+    </div>
+
+
+</body>
+</html>
