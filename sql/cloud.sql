@@ -1,3 +1,4 @@
+CREATE DATABASE cloud;
 USE cloud;
 
 DROP TABLE IF EXISTS USER;
@@ -11,7 +12,7 @@ CREATE TABLE USER(
 	register_time TIMESTAMP DEFAULT NOW() COMMENT '用户注册时间',
 	image_path VARCHAR(200) COMMENT '用户头像链接',
 	file_storehouse_id INT(11) COMMENT '文件仓库id'
-);
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
 
@@ -21,7 +22,7 @@ CREATE TABLE file_storehouse(
 	user_id INT(255) COMMENT '仓库所属用户id',
 	current_size INT(11) DEFAULT 0 COMMENT '当前容量(KB)',
 	MAX_SIZE INT(11) DEFAULT 1048576 COMMENT '最大容量(KB)'
-);
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
 
@@ -33,7 +34,7 @@ CREATE TABLE my_file_folder(
 	file_folder_path VARCHAR(255) DEFAULT '/' COMMENT '文件夹存储路径',
 	file_storehouse_id INT(255) COMMENT '所属文件仓库id',
 	create_time TIMESTAMP DEFAULT NOW() COMMENT '创建时间'
-);
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS my_file;
 CREATE TABLE my_file(
