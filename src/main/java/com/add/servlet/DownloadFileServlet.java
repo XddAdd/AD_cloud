@@ -38,7 +38,7 @@ public class DownloadFileServlet extends HttpServlet {
         ServletContext context = getServletContext();
         //获取文件类型
         String mineType = context.getMimeType(filePath);
-        //System.out.println("mineType = " + mineType);
+
         if (mineType == null){
                 mineType = "application/octet-stream";
         }

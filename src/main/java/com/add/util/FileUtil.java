@@ -10,7 +10,7 @@ import java.net.URL;
 public class FileUtil {
 
     public static String ROOT = "D:/myFtp/";
-    //public static String ROOT = "/usr/myFTP/";
+
 
     /**
      * 新建文件夹

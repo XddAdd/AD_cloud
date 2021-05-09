@@ -37,8 +37,7 @@
             <version>1.18.8</version>
             <scope>provided</scope>
         </dependency>
-        <!--jackson databind: 数据绑定包，提供Java对象与JSON数据格式进行序列化
-               及反序列化的支持 -->
+        <!--jacksonSON序列化及反序列化 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -69,7 +68,7 @@
 
 
     <build>
-        <!-- 打包后的包名（和我们部署的项目名一致） -->
+        <!-- 打包后的包名 -->
         <finalName>file-downloader</finalName>
         <plugins>
         </plugins>
