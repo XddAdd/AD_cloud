@@ -12,7 +12,8 @@ CREATE TABLE USER(
 	register_time TIMESTAMP DEFAULT NOW() COMMENT '用户注册时间',
 	image_path VARCHAR(200) COMMENT '用户头像链接',
 	file_storehouse_id INT(11) COMMENT '文件仓库id'
-)ENGINE=INNODB DEFAULT CHARSET=utf8;;
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 
 
 DROP TABLE IF EXISTS file_storehouse;
@@ -21,7 +22,7 @@ CREATE TABLE file_storehouse(
 	user_id INT(255) COMMENT '仓库所属用户id',
 	current_size INT(11) DEFAULT 0 COMMENT '当前容量(KB)',
 	MAX_SIZE INT(11) DEFAULT 1048576 COMMENT '最大容量(KB)'
-)ENGINE=INNODB DEFAULT CHARSET=utf8;;
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
 
@@ -33,9 +34,7 @@ CREATE TABLE my_file_folder(
 	file_folder_path VARCHAR(255) DEFAULT '/' COMMENT '文件夹存储路径',
 	file_storehouse_id INT(255) COMMENT '所属文件仓库id',
 	create_time TIMESTAMP DEFAULT NOW() COMMENT '创建时间'
-)ENGINE=INNODB DEFAULT CHARSET=utf8;;
-
-
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS my_file;
 CREATE TABLE my_file(
@@ -45,9 +44,26 @@ CREATE TABLE my_file(
 	download_count INT(11) DEFAULT 0 COMMENT '文件下载次数',
 	upload_time TIMESTAMP DEFAULT NOW() COMMENT '文件上传时间',
 	parent_folder_id INT(255) DEFAULT -1 COMMENT '父文件夹id',
-	file_size VARCHAR(255) COMMENT '文件大小',
+	file_size BIGINT(255) COMMENT '文件大小',
 	file_postfix VARCHAR(11) COMMENT '文件后缀',
 	file_storehouse_id INT(255) COMMENT '所属文件仓库id'
 )ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS file_download_task;
+CREATE TABLE file_download_task(
+	id INT(255) PRIMARY KEY AUTO_INCREMENT COMMENT '文件任务id',
+	parent_folder_id INT(255) DEFAULT -1 COMMENT '父文件夹id',
+	file_storehouse_id INT(255) COMMENT '所属文件仓库id',
+	download_url VARCHAR(255) NOT NULL COMMENT '下载链接',
+	target_path VARCHAR(255) NOT NULL COMMENT '下载目标目录',
+	file_size BIGINT(255) COMMENT '下载文件的大小',
+	download_size BIGINT DEFAULT 0 COMMENT '已经下载的大小',
+	start_time TIMESTAMP DEFAULT NOW() COMMENT '文件开始时间',
+	download_status INT(11) DEFAULT 0 COMMENT '任务状态,0,等待下载,1,正在下载,'
+)ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+
 
 

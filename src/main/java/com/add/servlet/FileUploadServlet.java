@@ -67,7 +67,7 @@ public class FileUploadServlet extends AbstractBaseServlet{
         //上传成功，插入数据库
         com.add.model.File myFile = new com.add.model.File();
         myFile.setFileName(file.getName());
-        myFile.setFileName(String.valueOf(file.getSize()));
+        myFile.setFileSize(file.getSize());
         myFile.setFilePostfix(file.getName().substring(file.getName().lastIndexOf(".")));
         myFile.setFileStorehouseId(Integer.parseInt(storeId));
         if (fileFolder == null) {
