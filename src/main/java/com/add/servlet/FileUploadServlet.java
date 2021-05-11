@@ -19,7 +19,6 @@ import java.util.List;
 public class FileUploadServlet extends AbstractBaseServlet{
     private FileDao fileDao = new FileDao();
 
-
     @Override
     protected Object process(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         //乱码处理

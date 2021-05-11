@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>启动下载任务处理线程</title>
+    <script src="../js/jquery-3.3.1.js"></script>
+    <script src="../js/getParameter.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //上传文件
+            $("#startFileDownloadHandlerBut").click(function () {
+                $.ajax({
+                    url: "../startFileDownloadHandlerBut",//请求路径
+                    type: "get",
+                    success: function (json) {
+                        var status = json.data;
+                        if (status == 0) {
+                            alert("开启任务下载处理线程失败！");
+                        } else if (status == 1) {
+                            alert("已经开启任务下载处理线程");
+                        }
+                    },
+                })
+
+            });
+
+
+        });
+    </script>
+</head>
+<body>
+
+<div>
+    <button id="startFileDownloadHandlerBut" type="button">点击后开启下载任务处理线程</button>
+</div>
+
+</body>
+</html>
