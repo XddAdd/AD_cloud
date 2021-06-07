@@ -16,7 +16,7 @@ public class FileListServlet extends AbstractBaseServlet{
         Integer storeId = Integer.parseInt(req.getParameter("storeId"));
         Integer folderId = Integer.parseInt(req.getParameter("folderId"));
         FileStorehouse fileStorehouse = fileDao.queryFileStorehouseByFileStoreIdFileFolderId(storeId, folderId);
-
+        System.out.println(fileStorehouse);
         return fileStorehouse;
     }
 }

@@ -19,33 +19,16 @@ public class DBTest {
         ResultSet res = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "SELECT * FROM user WHERE username = ?;";
-            pre = conn.prepareStatement(sql);
-            //设置占位符
-            pre.setString(1, "add");
+            String sql = "show tables;";
             //查询并处理结果集
+            pre = conn.prepareStatement(sql);
             res = pre.executeQuery();
-            User user = null;
             while (res.next()){
-                user = new User();
-                user.setId(res.getInt("id"));
-                user.setUsername("add");
-                user.setPassword(res.getString("password"));
-                user.setNickname(res.getString("nickname"));
-                user.setSex(res.getString("sex"));
-                user.setFileStorehouseId(res.getInt("file_storehouse_id"));
-                //日期的使用，java一般使用java.util.Date,年月日时分秒
-                java.sql.Date birthday = res.getDate("birthday");
-                if (birthday != null)
-                    user.setBirthday(new Date(birthday.getTime()));
-                Date registerTime = res.getTime("register_time");
-                if (registerTime != null)
-                    user.setRegisterTime(registerTime);
-                user.setImagePath(res.getString("image_path"));
+                String line = res.getString(1);
+                System.out.println(line);
             }
-            System.out.println(user);
         }catch (Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }finally {
                 DBUtil.close(conn,pre,res);
         }

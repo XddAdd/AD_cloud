@@ -58,7 +58,7 @@ public class FileUploadServlet extends AbstractBaseServlet{
         //判断已经存在文件
         if (FileUtil.isFileExisted(uploadPath)) throw new AppException("FILE001","文件已经存在");
         //不存在文件，上传文件
-        uploadSuccess = FileUtil.uploadFile(file, uploadPath);
+        uploadSuccess = FileUtil.uploadAllFile(file, uploadPath);
 
 
         //上传失败，不插入数据库

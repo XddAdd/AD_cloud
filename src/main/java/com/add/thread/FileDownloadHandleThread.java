@@ -12,7 +12,7 @@ public class FileDownloadHandleThread implements Runnable{
 
     @Override
     public void run() {
-
+        System.out.println("已经启动文件下载处理线程！");
 
             while (true) {
                 //执行sql

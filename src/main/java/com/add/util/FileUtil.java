@@ -1,15 +1,48 @@
 package com.add.util;
 
 import com.add.exception.AppException;
+import com.add.model.UploadFile;
 import org.apache.commons.fileupload.FileItem;
 
-import java.io.File;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileUtil {
 
+    public static Map<String, UploadFile> fileMap = new HashMap<>();
+
     public static String ROOT = "D:/myFtp/";
+    //public static String ROOT = "/usr/myFTP/";
+
+    public static Boolean isExist(String md5) {
+        return fileMap.containsKey(md5);
+    }
+
+
+    /**
+     * 获取uploadFile对象,没有则创建
+     */
+    public static UploadFile getUploadFile(String md5, String fileName, Long fileSize, Integer chunks) {
+        if (!isExist(md5)) {
+            synchronized (FileUtil.class) {
+                if (!isExist(md5)) {
+                    fileMap.put(md5, new UploadFile(md5, fileName, fileSize, chunks));
+                }
+            }
+        }
+        return fileMap.get(md5);
+    }
+
+    /**
+     * 获取uploadFile对象
+     */
+    public static UploadFile getUploadFile(String md5) {
+        return fileMap.get(md5);
+    }
+
 
 
     /**
@@ -48,8 +81,9 @@ public class FileUtil {
      * @param uploadPath 路径
      * @return
      */
-    public static Boolean uploadFile(FileItem file,String uploadPath){
+    public static Boolean uploadAllFile(FileItem file,String uploadPath){
         try {
+
             //写入文件到磁盘，该行执行完毕后，若有该临时文件，将会自动删除
             file.write(new File(uploadPath));
             return true;
@@ -104,8 +138,23 @@ public class FileUtil {
     }
 
 
+    public static void uploadChunkFile(String targetPath, Long targetFileSize, InputStream srcInput, long srcSize, Integer chunk, Integer chunks) throws IOException {
+        RandomAccessFile random = new RandomAccessFile(targetPath, "rw");
+        random.setLength(targetFileSize);
+        if (chunk == chunks) {
+            random.seek(targetFileSize - srcSize);
+        } else {
+            random.seek(chunk * srcSize);
+        }
+        byte[] buf = new byte[1024];
+        int len;
+        while (-1 != (len = srcInput.read(buf))) {
+            random.write(buf,0,len);
+        }
+        random.close();
+    }
 
-
-
-
+    public static void removeUploadFile(String fileMd5Value) {
+        fileMap.remove(fileMd5Value);
+    }
 }
