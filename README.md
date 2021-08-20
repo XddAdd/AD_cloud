@@ -2,11 +2,14 @@
 
 # AD_cloud
 web端个人云盘，前端是裸界面，纯粹是显示数据，连前端显示下载进度都是显示的byte单位的。
-后端是用的Tomcat，而且是纯的Servlet那套写的，后面会考虑用spring boot重构下。数据库使用的MySQL存储文件之间的一些关系。
+后端是用的Tomcat，而且是纯的Servlet那套写的，数据库使用的MySQL存储文件之间的一些关系。
+
+**目前在基于springboot+mybatis+springmvc重构中....地址：[AD_cloud_springboot](https://github.com/XddAdd/AD_Cloud_SpringBoot)**
+
 
 # 功能
 1. 用户注册登录
-2. 文件上传和下载(支持大文件的分块上传)
+2. 文件上传和下载(支持大文件上传和断点续传)
 3. 文件秒传(目前是用内存的hashmap，后面会改成redis)
 4. 异步创建文件夹
 5. 异步目录回退上一级
